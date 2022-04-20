@@ -14,3 +14,4 @@ jobs:
           owner: naiba
           base: master
           head: master
+          pr_title: 同步上游
