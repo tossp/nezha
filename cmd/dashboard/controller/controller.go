@@ -12,6 +12,7 @@ import (
 	"code.cloudfoundry.org/bytefmt"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/service/singleton"
@@ -26,6 +27,23 @@ func ServeWeb(port uint) *http.Server {
 	}
 	r.Use(mygin.RecordPath)
 	r.SetFuncMap(template.FuncMap{
+		"tr": func(id string, dataAndCount ...interface{}) string {
+			conf := i18n.LocalizeConfig{
+				MessageID: id,
+			}
+			if len(dataAndCount) > 0 {
+				conf.TemplateData = dataAndCount[0]
+			}
+			if len(dataAndCount) > 1 {
+				conf.PluralCount = dataAndCount[1]
+			}
+			return singleton.Localizer.MustLocalize(&conf)
+		},
+		"toValMap": func(val interface{}) map[string]interface{} {
+			return map[string]interface{}{
+				"Value": val,
+			}
+		},
 		"tf": func(t time.Time) string {
 			return t.In(singleton.Loc).Format("2006年1月2号 15:04:05")
 		},
