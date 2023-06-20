@@ -44,6 +44,30 @@ function showConfirm(title, content, callFn, extData) {
     .modal("show");
 }
 
+function postJson(url, data) {
+  return $.ajax({
+    url: url,
+    type: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(data),
+  }).done((resp) => {
+    if (resp.code == 200) {
+      if (resp.message) {
+        alert(resp.message);
+      } else {
+        alert("删除成功");
+      }
+      window.location.reload();
+    } else {
+      alert("删除失败 " + resp.code + "：" + resp.message);
+      confirmBtn.toggleClass("loading");
+    }
+  })
+    .fail((err) => {
+      alert("网络错误：" + err.responseText);
+    });
+}
+
 function showFormModal(modelSelector, formID, URL, getData) {
   $(modelSelector)
     .modal({
@@ -69,17 +93,31 @@ function showFormModal(modelSelector, formID, URL, getData) {
                 item.name === "ID" ||
                 item.name === "RequestType" ||
                 item.name === "RequestMethod" ||
+                item.name === "TriggerMode" ||
+                item.name === "TaskType" ||
                 item.name === "DisplayIndex" ||
                 item.name === "Type" ||
                 item.name === "Cover" ||
                 item.name === "Duration"
               ) {
                 obj[item.name] = parseInt(item.value);
+              } else if (item.name.endsWith("Latency")) {
+                obj[item.name] = parseFloat(item.value);
               } else {
                 obj[item.name] = item.value;
               }
 
               if (item.name.endsWith("ServersRaw")) {
+                if (item.value.length > 2) {
+                  obj[item.name] = JSON.stringify(
+                    [...item.value.matchAll(/\d+/gm)].map((k) =>
+                      parseInt(k[0])
+                    )
+                  );
+                }
+              }
+
+              if (item.name.endsWith("TasksRaw")) {
                 if (item.value.length > 2) {
                   obj[item.name] = JSON.stringify(
                     [...item.value.matchAll(/\d+/gm)].map((k) =>
@@ -130,12 +168,51 @@ function addOrEditAlertRule(rule) {
   modal.find("input[name=ID]").val(rule ? rule.ID : null);
   modal.find("input[name=Name]").val(rule ? rule.Name : null);
   modal.find("textarea[name=RulesRaw]").val(rule ? rule.RulesRaw : null);
+  modal.find("select[name=TriggerMode]").val(rule ? rule.TriggerMode : 0);
   modal.find("input[name=NotificationTag]").val(rule ? rule.NotificationTag : null);
   if (rule && rule.Enable) {
     modal.find(".ui.rule-enable.checkbox").checkbox("set checked");
   } else {
     modal.find(".ui.rule-enable.checkbox").checkbox("set unchecked");
   }
+  modal.find("a.ui.label.visible").each((i, el) => {
+    el.remove();
+  });
+  var failTriggerTasks;
+  var recoverTriggerTasks;
+  if (rule) {
+    failTriggerTasks = rule.FailTriggerTasksRaw;
+    recoverTriggerTasks = rule.RecoverTriggerTasksRaw;
+    const failTriggerTasksList = JSON.parse(failTriggerTasks || "[]");
+    const recoverTriggerTasksList = JSON.parse(recoverTriggerTasks || "[]");
+    const node1 = modal.find("i.dropdown.icon.1");
+    const node2 = modal.find("i.dropdown.icon.2");
+    for (let i = 0; i < failTriggerTasksList.length; i++) {
+      node1.after(
+        '<a class="ui label transition visible" data-value="' +
+        failTriggerTasksList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        failTriggerTasksList[i] +
+        '<i class="delete icon"></i></a>'
+      );
+    }
+    for (let i = 0; i < recoverTriggerTasksList.length; i++) {
+      node2.after(
+        '<a class="ui label transition visible" data-value="' +
+        recoverTriggerTasksList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        recoverTriggerTasksList[i] +
+        '<i class="delete icon"></i></a>'
+      );
+    }
+  }
+  modal
+    .find("input[name=FailTriggerTasksRaw]")
+    .val(rule ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
+  modal
+    .find("input[name=RecoverTriggerTasksRaw]")
+    .val(rule ? "[]," + recoverTriggerTasks.substr(1, recoverTriggerTasks.length - 2) : "[]");
+
   showFormModal(".rule.modal", "#ruleForm", "/api/alert-rule");
 }
 
@@ -206,10 +283,10 @@ function issueNewApiToken(apiToken) {
   const modal = $(".api.modal");
   modal.children(".header").text((apiToken ? LANG.Edit : LANG.Add) + ' ' + "API Token");
   modal
-      .find(".nezha-primary-btn.button")
-      .html(
-          apiToken ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
-      );
+    .find(".nezha-primary-btn.button")
+    .html(
+      apiToken ? LANG.Edit + '<i class="edit icon"></i>' : LANG.Add + '<i class="add icon"></i>'
+    );
   modal.find("textarea[name=Note]").val(apiToken ? apiToken.Note : null);
   showFormModal(".api.modal", "#apiForm", "/api/token");
 }
@@ -239,6 +316,11 @@ function addOrEditServer(server, conf) {
     modal.find(".command.field").attr("style", "display:none");
     modal.find("input[name=secret]").val("");
   }
+  if (server && server.HideForGuest) {
+    modal.find(".ui.hideforguest.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.hideforguest.checkbox").checkbox("set unchecked");
+  }
   showFormModal(".server.modal", "#serverForm", "/api/server");
 }
 
@@ -262,11 +344,28 @@ function addOrEditMonitor(monitor) {
   } else {
     modal.find(".ui.nb-notify.checkbox").checkbox("set unchecked");
   }
+  modal.find("input[name=MaxLatency]").val(monitor ? monitor.MaxLatency : null);
+  modal.find("input[name=MinLatency]").val(monitor ? monitor.MinLatency : null);
+  if (monitor && monitor.LatencyNotify) {
+    modal.find(".ui.nb-lt-notify.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.nb-lt-notify.checkbox").checkbox("set unchecked");
+  }
+  modal.find("a.ui.label.visible").each((i, el) => {
+    el.remove();
+  });
+  if (monitor && monitor.EnableTriggerTask) {
+    modal.find(".ui.nb-EnableTriggerTask.checkbox").checkbox("set checked");
+  } else {
+    modal.find(".ui.nb-EnableTriggerTask.checkbox").checkbox("set unchecked");
+  }
   var servers;
+  var failTriggerTasks;
+  var recoverTriggerTasks;
   if (monitor) {
     servers = monitor.SkipServersRaw;
     const serverList = JSON.parse(servers || "[]");
-    const node = modal.find("i.dropdown.icon");
+    const node = modal.find("i.dropdown.icon.specificServer");
     for (let i = 0; i < serverList.length; i++) {
       node.after(
         '<a class="ui label transition visible" data-value="' +
@@ -276,7 +375,39 @@ function addOrEditMonitor(monitor) {
         '<i class="delete icon"></i></a>'
       );
     }
+
+    failTriggerTasks = monitor.FailTriggerTasksRaw;
+    recoverTriggerTasks = monitor.RecoverTriggerTasksRaw;
+    const failTriggerTasksList = JSON.parse(failTriggerTasks || "[]");
+    const recoverTriggerTasksList = JSON.parse(recoverTriggerTasks || "[]");
+    const node1 = modal.find("i.dropdown.icon.failTask");
+    const node2 = modal.find("i.dropdown.icon.recoverTask");
+    for (let i = 0; i < failTriggerTasksList.length; i++) {
+      node1.after(
+        '<a class="ui label transition visible" data-value="' +
+        failTriggerTasksList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        failTriggerTasksList[i] +
+        '<i class="delete icon"></i></a>'
+      );
+    }
+    for (let i = 0; i < recoverTriggerTasksList.length; i++) {
+      node2.after(
+        '<a class="ui label transition visible" data-value="' +
+        recoverTriggerTasksList[i] +
+        '" style="display: inline-block !important;">ID:' +
+        recoverTriggerTasksList[i] +
+        '<i class="delete icon"></i></a>'
+      );
+    }
   }
+  modal
+    .find("input[name=FailTriggerTasksRaw]")
+    .val(monitor ? "[]," + failTriggerTasks.substr(1, failTriggerTasks.length - 2) : "[]");
+  modal
+    .find("input[name=RecoverTriggerTasksRaw]")
+    .val(monitor ? "[]," + recoverTriggerTasks.substr(1, recoverTriggerTasks.length - 2) : "[]");
+
   modal
     .find("input[name=SkipServersRaw]")
     .val(monitor ? "[]," + servers.substr(1, servers.length - 2) : "[]");
@@ -293,6 +424,8 @@ function addOrEditCron(cron) {
     );
   modal.find("input[name=ID]").val(cron ? cron.ID : null);
   modal.find("input[name=Name]").val(cron ? cron.Name : null);
+  modal.find("select[name=TaskType]").val(cron ? cron.TaskType : 0);
+  modal.find("select[name=Cover]").val(cron ? cron.Cover : 0);
   modal.find("input[name=NotificationTag]").val(cron ? cron.NotificationTag : null);
   modal.find("input[name=Scheduler]").val(cron ? cron.Scheduler : null);
   modal.find("a.ui.label.visible").each((i, el) => {
@@ -425,6 +558,18 @@ $(document).ready(() => {
       clearable: true,
       apiSettings: {
         url: "/api/search-server?word={query}",
+        cache: false,
+      },
+    });
+  } catch (error) { }
+});
+
+$(document).ready(() => {
+  try {
+    $(".ui.tasks.search.dropdown").dropdown({
+      clearable: true,
+      apiSettings: {
+        url: "/api/search-tasks?word={query}",
         cache: false,
       },
     });

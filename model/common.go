@@ -2,17 +2,19 @@ package model
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 const CtxKeyAuthorizedUser = "ckau"
-
+const CtxKeyViewPasswordVerified = "ckvpv"
 const CacheKeyOauth2State = "p:a:state"
 
 type Common struct {
-	ID        uint64    `gorm:"primaryKey"`
-	CreatedAt time.Time `sql:"index"`
-	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	ID        uint64         `gorm:"primaryKey"`
+	CreatedAt time.Time      `gorm:"index;<-:create"`
+	UpdatedAt time.Time      `gorm:"autoUpdateTime"`
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 type Response struct {

@@ -1,32 +1,41 @@
 package model
 
 import (
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 
 	"github.com/spf13/viper"
-	"gopkg.in/yaml.v2"
+	"sigs.k8s.io/yaml"
 )
 
 var Languages = map[string]string{
 	"zh-CN": "简体中文",
+	"zh-TW": "繁體中文",
 	"en-US": "English",
 	"es-ES": "Español",
 }
 
 var Themes = map[string]string{
-	"default":  "Default",
-	"daynight": "JackieSung DayNight",
-	"mdui":     "Neko Mdui",
-	"hotaru":   "Hotaru",
-	"custom":   "Custom(third-party)",
+	"default":      "Default",
+	"daynight":     "JackieSung DayNight",
+	"mdui":         "Neko Mdui",
+	"hotaru":       "Hotaru",
+	"angel-kanade": "AngelKanade",
+	"custom":       "Custom(local)",
+}
+
+var DashboardThemes = map[string]string{
+	"default": "Default",
+	"custom":  "Custom(local)",
 }
 
 const (
-	ConfigTypeGitHub = "github"
-	ConfigTypeGitee  = "gitee"
+	ConfigTypeGitHub  = "github"
+	ConfigTypeGitee   = "gitee"
+	ConfigTypeGitlab  = "gitlab"
+	ConfigTypeJihulab = "jihulab"
+	ConfigTypeGitea   = "gitea"
 )
 
 const (
@@ -60,7 +69,7 @@ func (c *AgentConfig) Save() error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(c.v.ConfigFileUsed(), data, os.ModePerm)
+	return os.WriteFile(c.v.ConfigFileUsed(), data, os.ModePerm)
 }
 
 // Config 站点配置
@@ -68,17 +77,19 @@ type Config struct {
 	Debug    bool   // debug模式开关
 	Language string // 系统语言，默认 zh-CN
 	Site     struct {
-		Brand        string // 站点名称
-		CookieName   string // 浏览器 Cookie 名称
-		Theme        string
-		CustomCode   string
-		ViewPassword string // 前台查看密码
+		Brand          string // 站点名称
+		CookieName     string // 浏览器 Cookie 名称
+		Theme          string
+		DashboardTheme string
+		CustomCode     string
+		ViewPassword   string // 前台查看密码
 	}
 	Oauth2 struct {
 		Type         string
 		Admin        string // 管理员用户名列表
 		ClientID     string
 		ClientSecret string
+		Endpoint     string
 	}
 	HTTPPort      uint
 	GRPCPort      uint
@@ -93,6 +104,8 @@ type Config struct {
 	IPChangeNotificationTag    string
 	Cover                      uint8  // 覆盖范围（0:提醒未被 IgnoredIPNotification 包含的所有服务器; 1:仅提醒被 IgnoredIPNotification 包含的服务器;）
 	IgnoredIPNotification      string // 特定服务器IP（多个服务器用逗号分隔）
+
+	Location string // 时区，默认为 Asia/Shanghai
 
 	v                              *viper.Viper
 	IgnoredIPNotificationServerIDs map[uint64]bool // [ServerID] -> bool(值为true代表当前ServerID在特定服务器列表内）
@@ -115,6 +128,9 @@ func (c *Config) Read(path string) error {
 	if c.Site.Theme == "" {
 		c.Site.Theme = "default"
 	}
+	if c.Site.DashboardTheme == "" {
+		c.Site.DashboardTheme = "default"
+	}
 	if c.Language == "" {
 		c.Language = "zh-CN"
 	}
@@ -123,6 +139,9 @@ func (c *Config) Read(path string) error {
 	}
 	if c.EnableIPChangeNotification && c.IPChangeNotificationTag == "" {
 		c.IPChangeNotificationTag = "default"
+	}
+	if c.Location == "" {
+		c.Location = "Asia/Shanghai"
 	}
 
 	c.updateIgnoredIPNotificationID()
@@ -148,5 +167,5 @@ func (c *Config) Save() error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(c.v.ConfigFileUsed(), data, os.ModePerm)
+	return os.WriteFile(c.v.ConfigFileUsed(), data, os.ModePerm)
 }

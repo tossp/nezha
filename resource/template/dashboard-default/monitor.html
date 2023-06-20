@@ -1,4 +1,4 @@
-{{define "dashboard/monitor"}} {{template "common/header" .}} {{template
+{{define "dashboard-default/monitor"}} {{template "common/header" .}} {{template
 "common/menu" .}}
 <div class="nb-container">
   <div class="ui container">
@@ -20,7 +20,11 @@
           <th>{{tr "Type"}}</th>
           <th>{{tr "Duration"}}</th>
           <th>{{tr "NotificationMethodGroup"}}</th>
-          <th>{{tr "Notification"}}</th>
+          <th>{{tr "FailureNotification"}}</th>
+          <th>{{tr "LatencyNotification"}}</th>
+          <th>{{tr "EnableTriggerTask"}}</th>
+          <th>{{tr "FailTriggerTasks"}}</th>
+          <th>{{tr "RecoverTriggerTasks"}}</th>
           <th>{{tr "Administration"}}</th>
         </tr>
       </thead>
@@ -39,6 +43,10 @@
           <td>{{$monitor.Duration}} {{tr "Seconds"}}</td>
           <td>{{$monitor.NotificationTag}}</td>
           <td>{{$monitor.Notify}}</td>
+          <td>{{$monitor.LatencyNotify}}</td>
+          <td>{{$monitor.EnableTriggerTask}}</td>
+          <td>{{$monitor.FailTriggerTasksRaw}}</td>
+          <td>{{$monitor.RecoverTriggerTasksRaw}}</td>
           <td>
             <div class="ui mini icon buttons">
               <button class="ui button" onclick="addOrEditMonitor({{$monitor}})">

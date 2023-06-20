@@ -70,6 +70,9 @@ other = "Ignorar todo y ejecutar sólo a través de servidores específicos"
 [AllIncludedOnlySpecificServersAreNotExecuted]
 other = "Todos los servidores, sólo los específicos no ejecutan comandos"
 
+[ExecuteByTriggerServer]
+other = "Sólo los servidores incluidos en las reglas de notificación"
+
 [SpecificServers]
 other = "Servidores específicos"
 
@@ -82,11 +85,20 @@ other = "Grupo de métodos de notificación"
 [PushSuccessMessages]
 other = "Enviar el mensaje con éxito"
 
+[TaskType]
+other = "Tipo de tarea"
+
+[CronTask]
+other = "Tarea programada"
+
+[TriggerTask]
+other = "Tarea activa"
+
 [TheFormaOfTheScheduleIs]
 other = "El formato del plan es:"
 
 [SecondsMinutesHoursDaysMonthsWeeksSeeDetails]
-other = "Segundos minutos horas días meses semanas, ver detalles a"
+other = "Segundos, minutos, horas, días, meses, semanas, ver detalles a"
 
 [ScheduleExpressionFormat]
 other = "Formato de expresiones cron"
@@ -118,6 +130,21 @@ other = "segundos"
 [EnableFailureNotification]
 other = "Activar la notificación de fallos"
 
+[FailureNotification]
+other = "Notificación de fallos"
+
+[MaxLatency]
+other = "Retardo máximo (ms)"
+
+[MinLatency]
+other = "Retardo mínimo (ms)"
+
+[EnableLatencyNotification]
+other = "Activar las notificaciones de retraso de la red"
+
+[LatencyNotification]
+other = "Notificación de retraso de la red"
+
 [IntroductionOfMonitor]
 other = """
 Introduzca la URL cuando el tipo sea <b>HTTP-GET</b> (si es con protocolo HTTPS, por cierto, monitorizará el certificado SSL) <br>
@@ -148,11 +175,38 @@ other = "Añadir reglas de notificación"
 [Rules]
 other = "Reglas"
 
+[NotificationTriggerMode]
+other = "Modo de activar la notificación"
+
+[ModeAlwaysTrigger]
+other = "Siempre se activa"
+
+[ModeOnetimeTrigger]
+other = "Se activa sólo una vez"
+
+[EnableTriggerTask]
+other = "Activar tareas de activación"
+
+[FailTriggerTasks]
+other = "Tareas que se activan en caso de fallo"
+
+[RecoverTriggerTasks]
+other = "Tareas que se activan tras la recuperación del fallo"
+
 [Enable]
 other = "Activar"
 
 [AddServer]
 other = "Añadir un servidor"
+
+[BatchEditServerGroup]
+other = "Modificación de grupos por lotes"
+
+[BatchDeleteServer]
+other = "Batch Delete Server"
+
+[InputServerGroupName]
+other = "Introduzca un nombre de grupo"
 
 [ServerGroup]
 other = "Grupos de servidores"
@@ -164,7 +218,7 @@ other = "Einstein - Velocidad de la luz 1"
 other = "Índice de visualización"
 
 [TheLargerTheNumberTheHigherThePriority]
-other = "Un índice mayor se clasificará antes"
+other = "Los números más grandes se mostrarán primero"
 
 [Secret]
 other = "Clave"
@@ -182,7 +236,7 @@ other = "Por favor, configure el dominio o IP del servidor del panel que no est�
 other = "Enviado correctamente"
 
 [LastExecution]
-other = "Última ejecución"
+other = "Última ejecución en"
 
 [LastResult]
 other = "Resultado final"
@@ -195,6 +249,9 @@ other = "Cubriendo todo"
 
 [IgnoreAll]
 other = "Ignora todo"
+
+[ByTrigger]
+other = "Ejecutar cuando se activa"
 
 [DeleteScheduledTask]
 other = "Eliminar la tarea programada"
@@ -247,14 +304,14 @@ other = "Número de versión"
 [OneKeyInstall]
 other = "Instalación con un solo clic"
 
-[ClickToCopyTheInstallationCommand]
-other = "Haga clic para copiar el comando de instalación"
+[ClickToCopy]
+other = "Haga clic para copiar"
 
 [DeleteServer]
 other = "Eliminar el servidor"
 
-[ConfirmToDeleteThisServer]
-other = "¿Confirma que quiere eliminar este servidor?"
+[ConfirmToDeleteServer]
+other = "¿Confirma que quiere eliminar servidor?"
 
 [NoServerSelected]
 other = "No hay servidores seleccionados actualmente"
@@ -269,7 +326,7 @@ other = "Título del sitio"
 other = "Lista de administradores"
 
 [Theme]
-other = "Temas"
+other = "Tema"
 
 [CustomCodes]
 other = "Códigos personalizados"
@@ -281,13 +338,13 @@ other = "Contraseña de acceso"
 other = "El dominio o IP del servidor del panel no está conectado a la CDN"
 
 [IPChangeAlert]
-other = "Alerta de cambio de IP"
+other = "Notificación de cambio de IP"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
 other = "Cubrir todo, ignorar sólo servidores específicos"
 
 [IgnoreAllOnlyAlertSpecificServers]
-other = "Omitir todo, notificar sólo a los servidores específicos"
+other = "Omitir todo, cubrir sólo servidores específicos"
 
 [IgnoreAllRequestOnlyThroughSpecificServers]
 other = "Omitir todos los servidores, sólo enviar peticiones a través de servidores específicos"
@@ -356,10 +413,10 @@ other = "Último activo"
 other = "Versiones"
 
 [NetSpeed]
-other = "Velocidad de la red"
+other = "Red"
 
 [Uptime]
-other = "Tiempo de funcionamiento"
+other = "Activo"
 
 [ServerIsOffline]
 other = "El servidor está desconectado"
@@ -368,13 +425,13 @@ other = "El servidor está desconectado"
 other = "Días"
 
 [RealtimeChannelEstablished]
-other = "Establecimiento de canal en tiempo real"
+other = "Canal en tiempo real está conectados"
 
 [GetTheLatestMonitoringDataInRealTime]
 other = "¡Ahora puede obtener los últimos datos de monitorización en tiempo real!"
 
 [RealtimeChannelDisconnect]
-other = "Desconexión de canal en tiempo real"
+other = "Canal en tiempo real desconectado"
 
 [CanNotGetTheLatestMonitoringDataInRealTime]
 other = "¡No puede obtener los últimos datos de monitorización en tiempo real!"
@@ -392,22 +449,22 @@ other = "Estado"
 other = "Disponibilidad"
 
 [AverageLatency]
-other = "Latencia media"
+other = "Retardo medio"
 
 [CycleTransferStats]
-other = "Estadísticas de transmisión circular"
+other = "Estadísticas del ciclo de consumo de datos"
 
 [From]
 other = "Desde"
 
 [To]
-other = "A"
+other = "Hasta"
 
 [NextCheck]
 other = "Siguiente prueba"
 
 [CurrentUsage]
-other = "Uso actual"
+other = "Consumo"
 
 [VerifyPassword]
 other = "Verificar contraseña"
@@ -515,7 +572,7 @@ other = "Fallo"
 other = "No hay datos disponibles"
 
 [StatusGood]
-other = "Buena"
+other = "Buen"
 
 [StatusLowAvailability]
 other = "Baja disponibilidad"
@@ -528,3 +585,15 @@ other = "Tarea ejecutada fallida"
 
 [IPChanged]
 other = "Cambio de IP"
+
+[Transleft]
+other = "Datos restantes"
+
+[DashboardTheme]
+other = "Tema del panel de administración"
+
+[Info]
+other = "Información"
+
+[HideForGuest]
+other = "No se muestra a los visitantes"

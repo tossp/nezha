@@ -44,8 +44,9 @@ func ServeWeb(port uint) *http.Server {
 	r.NoMethod(page404)
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", port),
-		Handler: r,
+		Addr:              fmt.Sprintf(":%d", port),
+		ReadHeaderTimeout: time.Second * 5,
+		Handler:           r,
 	}
 	return srv
 }
@@ -148,9 +149,41 @@ var funcMap = template.FuncMap{
 	"add": func(a, b int) int {
 		return a + b
 	},
+	"TransLeftPercent": func(a, b float64) (n float64) {
+		n, _ = strconv.ParseFloat(fmt.Sprintf("%.2f", (100-(a/b)*100)), 64)
+		if n < 0 {
+			n = 0
+		}
+		return
+	},
+	"TransLeft": func(a, b uint64) string {
+		if a < b {
+			return "0B"
+		}
+		return bytefmt.ByteSize(a - b)
+	},
+	"TransClassName": func(a float64) string {
+		if a == 0 {
+			return "offline"
+		}
+		if a > 50 {
+			return "fine"
+		}
+		if a > 20 {
+			return "warning"
+		}
+		if a > 0 {
+			return "error"
+		}
+		return "offline"
+	},
+	"UintToFloat": func(a uint64) (n float64) {
+		n, _ = strconv.ParseFloat((strconv.FormatUint(a, 10)), 64)
+		return
+	},
 	"dayBefore": func(i int) string {
 		year, month, day := time.Now().Date()
-		today := time.Date(year, month, day, 0, 0, 0, 0, time.Local)
+		today := time.Date(year, month, day, 0, 0, 0, 0, singleton.Loc)
 		return today.AddDate(0, 0, i-29).Format("01/02")
 	},
 	"className": func(percent float32) string {

@@ -70,6 +70,9 @@ other = "忽略所有，仅通过特定服务器执行"
 [AllIncludedOnlySpecificServersAreNotExecuted]
 other = "覆盖所有，仅特定服务器不执行"
 
+[ExecuteByTriggerServer]
+other = "由触发的服务器执行"
+
 [SpecificServers]
 other = "特定服务器"
 
@@ -81,6 +84,15 @@ other = "通知方式组"
 
 [PushSuccessMessages]
 other = "推送成功的消息"
+
+[TaskType]
+other = "任务类型"
+
+[CronTask]
+other = "计划任务"
+
+[TriggerTask]
+other = "触发任务"
 
 [TheFormaOfTheScheduleIs]
 other = "计划的格式为："
@@ -118,6 +130,21 @@ other = "秒"
 [EnableFailureNotification]
 other = "启用故障通知"
 
+[FailureNotification]
+other = "故障通知"
+
+[MaxLatency]
+other = "最大延迟(ms)"
+
+[MinLatency]
+other = "最小延迟(ms)"
+
+[EnableLatencyNotification]
+other = "启用延迟通知"
+
+[LatencyNotification]
+other = "延迟通知"
+
 [IntroductionOfMonitor]
 other = """
 类型为 <b>HTTP-GET</b> 时输入URL(带 http/https, HTTPS协议的会顺带监控SSL证书)；<br>
@@ -148,11 +175,38 @@ other = "添加报警规则"
 [Rules]
 other = "规则"
 
+[NotificationTriggerMode]
+other = "通知触发模式"
+
+[ModeAlwaysTrigger]
+other = "始终触发"
+
+[ModeOnetimeTrigger]
+other = "单次触发"
+
+[EnableTriggerTask]
+other = "启用触发任务"
+
+[FailTriggerTasks]
+other = "故障时触发任务"
+
+[RecoverTriggerTasks]
+other = "恢复时触发任务"
+
 [Enable]
 other = "启用"
 
 [AddServer]
 other = "添加服务器"
+
+[BatchEditServerGroup]
+other = "批量修改分组"
+
+[BatchDeleteServer]
+other = "批量删除服务器"
+
+[InputServerGroupName]
+other = "输入分组名称"
 
 [ServerGroup]
 other = "服务器分组"
@@ -195,6 +249,9 @@ other = "覆盖所有"
 
 [IgnoreAll]
 other = "忽略所有"
+
+[ByTrigger]
+other = "触发执行"
 
 [DeleteScheduledTask]
 other = "删除计划任务"
@@ -247,14 +304,14 @@ other = "版本号"
 [OneKeyInstall]
 other = "一键安装"
 
-[ClickToCopyTheInstallationCommand]
-other = "点击复制安装命令"
+[ClickToCopy]
+other = "点击复制"
 
 [DeleteServer]
 other = "删除主机"
 
-[ConfirmToDeleteThisServer]
-other = "确认删除此主机？"
+[ConfirmToDeleteServer]
+other = "确认删除主机？"
 
 [NoServerSelected]
 other = "当前没有选中的服务器"
@@ -470,19 +527,19 @@ other = "服务监控"
 other = "计划任务"
 
 [ApiManagement]
-other="API"
+other = "API"
 
 [IssueNewApiToken]
-other="添加Token"
+other = "添加Token"
 
 [Token]
-other="Token"
+other = "Token"
 
 [DeleteToken]
-other="删除Token"
+other = "删除Token"
 
 [ConfirmToDeleteThisToken]
-other="确认删除Token"
+other = "确认删除Token"
 
 [YouAreNotAuthorized]
 other = "此页面需要登录"
@@ -528,3 +585,15 @@ other = "任务失败"
 
 [IPChanged]
 other = "IP变更"
+
+[Transleft]
+other = "流量剩余"
+
+[DashboardTheme]
+other = "管理后台主题"
+
+[Info]
+other = "信息"
+
+[HideForGuest]
+other = "对游客隐藏"

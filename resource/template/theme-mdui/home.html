@@ -9,7 +9,7 @@
   <link rel="shortcut icon" type="image/png" href="/static/logo.svg?v20210804" />
 
   <!-- MDUI CSS -->
-  <link rel="stylesheet" href="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-0-M/mdui/1.0.2/css/mdui.min.css"/>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/mdui/1.0.2/css/mdui.min.css"/>
   <link rel="stylesheet" href="/static/theme-mdui/mdui.css" type="text/css">
   <style>
 	.mdui-table td, .mdui-table th{padding: 6px;}
@@ -37,7 +37,7 @@
         <div class="mdui-col" v-for='server in servers' :id="server.ID">
           <div :class="'mdui-card mt' + (server.live?'':' offline')">
             <div class="mdui-card-header">
-	      <img class="mdui-card-header-avatar" :src="'https://lf6-cdn-tos.bytecdntp.com/cdn/expire-0-M/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode?server.Host.CountryCode:'cn') + '.svg'"/>
+	      <img class="mdui-card-header-avatar" :src="'https://cdn.staticfile.org/flag-icon-css/4.1.5/flags/1x1/' + (server.Host.CountryCode?server.Host.CountryCode:'cn') + '.svg'"/>
 	      <div class="mdui-card-header-title">@#server.Name#@</div>
 	      <div class="mdui-card-header-subtitle">@#server.Host.CountryCode.toUpperCase()#@ | @#server.Host.Platform#@ @#server.Host.PlatformVersion#@</div>
             </div>
@@ -153,9 +153,9 @@
 {{template "theme-mdui/footer" .}}
 
   <script src="/static/theme-mdui/mdui.js"></script>
-  <script src="https://lf9-cdn-tos.bytecdntp.com/cdn/expire-1-M/mdui/1.0.2/js/mdui.min.js"></script>
-  <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/jquery/3.6.0/jquery.min.js"></script>
-  <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.min.js"></script>
+  <script src="https://cdn.staticfile.org/mdui/1.0.2/js/mdui.min.js"></script>
+  <script src="https://cdn.staticfile.org/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://cdn.staticfile.org/vue/2.6.14/vue.min.js"></script>
 
   <script>
     var container=document.querySelector("#container");
@@ -228,66 +228,80 @@
     })
 
     const wsProtocol = window.location.protocol == "https:" ? "wss" : "ws"
-    const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
-    ws.onopen = function (evt) {
+    let canShowError = true;
+    function connect() {
+      const ws = new WebSocket(wsProtocol + '://' + window.location.host + '/ws');
+      ws.onopen = function (evt) {
+        canShowError = true;
         mdui.snackbar({
           message: '{{tr "RealtimeChannelEstablished"}}',
           timeout: 2000,
           position: 'top',
-          onClosed: function(){
+          onClosed: function () {
             mdui.mutation();
           }
         });
-    }
-    var infoTooltip = {}, memTooltip = {};
-    ws.onmessage = function (evt) {
+      }
+      var infoTooltip = {}, memTooltip = {};
+      ws.onmessage = function (evt) {
         const data = JSON.parse(evt.data)
         statusCards.servers = data.servers
         for (let i = 0; i < statusCards.servers.length; i++) {
-            const ns = statusCards.servers[i];
-            if (!ns.Host) ns.live = false
-            else {
-                const lastActive = new Date(ns.LastActive).getTime()
-                if (data.now - lastActive > 10 * 1000) {
-                    ns.live = false
-                } else {
-                    ns.live = true
-                    if (statusCards.showCard) {
-                      if (infoTooltip[ns.ID]) {
-                        var disk =  statusCards.formatByteSize(ns.State.DiskUsed) + '/' + statusCards.formatByteSize(ns.Host.DiskTotal);
-                        var upTime = statusCards.secondToDate(ns.State.Uptime);
-                        var content =
-  `System: ${ns.Host.Platform}-${ns.Host.PlatformVersion}[${ns.Host.Arch}]
+          const ns = statusCards.servers[i];
+          if (!ns.Host) ns.live = false
+          else {
+            const lastActive = new Date(ns.LastActive).getTime()
+            if (data.now - lastActive > 10 * 1000) {
+              ns.live = false
+            } else {
+              ns.live = true
+              if (statusCards.showCard) {
+                if (infoTooltip[ns.ID]) {
+                  var disk = statusCards.formatByteSize(ns.State.DiskUsed) + '/' + statusCards.formatByteSize(ns.Host.DiskTotal);
+                  var upTime = statusCards.secondToDate(ns.State.Uptime);
+                  var content =
+                    `System: ${ns.Host.Platform}-${ns.Host.PlatformVersion}[${ns.Host.Arch}]
   CPU: ${ns.Host.CPU}
   Disk: ${disk}
   Online: ${upTime}
   Version: ${ns.Host.Version}`;
-                        infoTooltip[ns.ID].$element[0].innerText = content;
-                      }
-                      else {
-                        if (document.getElementById(`info-${ns.ID}`)) infoTooltip[ns.ID] = new mdui.Tooltip(`#info-${ns.ID}`, {});
-                      }
-
-                      if (memTooltip[ns.ID]) {
-                        var content = `${statusCards.formatByteSize(ns.State.MemUsed)}/${statusCards.formatByteSize(ns.Host.MemTotal)}`;
-                        memTooltip[ns.ID].$element[0].innerText = content;
-                      }
-                      else {
-                        if (document.getElementById(`mem-${ns.ID}`)) memTooltip[ns.ID] = new mdui.Tooltip(`#mem-${ns.ID}`, {});
-                      }
-                    } else {mdui.$('div').remove('.mdui-tooltip'); infoTooltip = {}; memTooltip = {};}
+                  infoTooltip[ns.ID].$element[0].innerText = content;
                 }
+                else {
+                  if (document.getElementById(`info-${ns.ID}`)) infoTooltip[ns.ID] = new mdui.Tooltip(`#info-${ns.ID}`, {});
+                }
+
+                if (memTooltip[ns.ID]) {
+                  var content = `${statusCards.formatByteSize(ns.State.MemUsed)}/${statusCards.formatByteSize(ns.Host.MemTotal)}`;
+                  memTooltip[ns.ID].$element[0].innerText = content;
+                }
+                else {
+                  if (document.getElementById(`mem-${ns.ID}`)) memTooltip[ns.ID] = new mdui.Tooltip(`#mem-${ns.ID}`, {});
+                }
+              } else { mdui.$('div').remove('.mdui-tooltip'); infoTooltip = {}; memTooltip = {}; }
             }
+          }
         }
         mdui.mutation();
+      }
+      ws.onclose = function () {
+        if (canShowError) {
+          canShowError = false;
+          mdui.snackbar({
+            message: '{{tr "RealtimeChannelDisconnect"}}',
+            timeout: 2000,
+            position: 'top',
+          });
+        }
+        setTimeout(function () {
+          connect()
+        }, 3000);
+      }
+      ws.onerror = function () {
+        ws.close()
+      }
     }
-    ws.onclose = function () {
-        mdui.snackbar({
-          message: '{{tr "RealtimeChannelDisconnect"}}',
-          timeout: 2000,
-          position: 'top',
-        });
-    }
+    connect();
   </script>
 </body>
 </html>

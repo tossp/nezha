@@ -20,13 +20,14 @@ import (
 	"github.com/naiba/nezha/model"
 	"github.com/naiba/nezha/pkg/mygin"
 	"github.com/naiba/nezha/pkg/utils"
+	"github.com/naiba/nezha/pkg/websocketx"
 	"github.com/naiba/nezha/proto"
 	"github.com/naiba/nezha/service/singleton"
 )
 
 type terminalContext struct {
-	agentConn *websocket.Conn
-	userConn  *websocket.Conn
+	agentConn *websocketx.Conn
+	userConn  *websocketx.Conn
 	serverID  uint64
 	host      string
 	useSSL    bool
@@ -101,6 +102,7 @@ func (p *commonPage) checkViewPassword(c *gin.Context) {
 		return
 	}
 
+	c.Set(model.CtxKeyViewPasswordVerified, true)
 	c.Next()
 }
 
@@ -125,20 +127,32 @@ func (p *commonPage) service(c *gin.Context) {
 	}))
 }
 
-func (cp *commonPage) getServerStat() ([]byte, error) {
+func (cp *commonPage) getServerStat(c *gin.Context) ([]byte, error) {
 	v, err, _ := cp.requestGroup.Do("serverStats", func() (any, error) {
 		singleton.SortedServerLock.RLock()
 		defer singleton.SortedServerLock.RUnlock()
+
+		_, isMember := c.Get(model.CtxKeyAuthorizedUser)
+		_, isViewPasswordVerfied := c.Get(model.CtxKeyViewPasswordVerified)
+
+		var servers []*model.Server
+
+		if isMember || isViewPasswordVerfied {
+			servers = singleton.SortedServerList
+		} else {
+			servers = singleton.SortedServerListForGuest
+		}
+
 		return utils.Json.Marshal(Data{
 			Now:     time.Now().Unix() * 1000,
-			Servers: singleton.SortedServerList,
+			Servers: servers,
 		})
 	})
 	return v.([]byte), err
 }
 
 func (cp *commonPage) home(c *gin.Context) {
-	stat, err := cp.getServerStat()
+	stat, err := cp.getServerStat(c)
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
@@ -167,6 +181,8 @@ type Data struct {
 	Servers []*model.Server `json:"servers,omitempty"`
 }
 
+var cloudflareCookiesValidator = regexp.MustCompile("^[A-Za-z0-9-_]+$")
+
 func (cp *commonPage) ws(c *gin.Context) {
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -184,7 +200,7 @@ func (cp *commonPage) ws(c *gin.Context) {
 	defer conn.Close()
 	count := 0
 	for {
-		stat, err := cp.getServerStat()
+		stat, err := cp.getServerStat(c)
 		if err != nil {
 			continue
 		}
@@ -279,13 +295,13 @@ func (cp *commonPage) terminal(c *gin.Context) {
 			return
 		}
 		cloudflareCookies, _ := c.Cookie("CF_Authorization")
-		// CloudflareCookies合法性验证
+		// Cloudflare Cookies 合法性验证
 		// 其应该包含.分隔的三组BASE64-URL编码
 		if cloudflareCookies != "" {
 			encodedCookies := strings.Split(cloudflareCookies, ".")
 			if len(encodedCookies) == 3 {
 				for i := 0; i < 3; i++ {
-					if valid, _ := regexp.MatchString("^[A-Za-z0-9-_]+$", encodedCookies[i]); !valid {
+					if !cloudflareCookiesValidator.MatchString(encodedCookies[i]) {
 						cloudflareCookies = ""
 						break
 					}
@@ -315,7 +331,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		}
 	}
 
-	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	wsConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		mygin.ShowErrorPage(c, mygin.ErrInfo{
 			Code: http.StatusInternalServerError,
@@ -328,7 +344,8 @@ func (cp *commonPage) terminal(c *gin.Context) {
 		}, true)
 		return
 	}
-	defer conn.Close()
+	defer wsConn.Close()
+	conn := &websocketx.Conn{Conn: wsConn}
 
 	log.Printf("NEZHA>> terminal connected %t %q", isAgent, c.Request.URL)
 	defer log.Printf("NEZHA>> terminal disconnected %t %q", isAgent, c.Request.URL)
@@ -387,7 +404,7 @@ func (cp *commonPage) terminal(c *gin.Context) {
 	}()
 
 	var dataBuffer [][]byte
-	var distConn *websocket.Conn
+	var distConn *websocketx.Conn
 	checkDistConn := func() {
 		if distConn == nil {
 			if isAgent {
@@ -489,7 +506,7 @@ func (cp *commonPage) createTerminal(c *gin.Context) {
 		useSSL:   createTerminalReq.Protocol == "https:",
 	}
 
-	c.HTML(http.StatusOK, "dashboard/terminal", mygin.CommonEnvironment(c, gin.H{
+	c.HTML(http.StatusOK, "dashboard-"+singleton.Conf.Site.DashboardTheme+"/terminal", mygin.CommonEnvironment(c, gin.H{
 		"SessionID":  id,
 		"ServerName": server.Name,
 	}))

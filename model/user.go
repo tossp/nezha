@@ -1,12 +1,11 @@
 package model
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/google/go-github/github"
-
-	"github.com/naiba/nezha/pkg/utils"
+	"code.gitea.io/sdk/gitea"
+	"github.com/google/go-github/v47/github"
+	"github.com/xanzy/go-gitlab"
 )
 
 type User struct {
@@ -24,6 +23,36 @@ type User struct {
 	SuperAdmin   bool      `json:"super_admin,omitempty"`   // 超级管理员
 }
 
+func NewUserFromGitea(gu *gitea.User) User {
+	var u User
+	u.ID = uint64(gu.ID)
+	u.Login = gu.UserName
+	u.AvatarURL = gu.AvatarURL
+	u.Name = gu.FullName
+	if u.Name == "" {
+		u.Name = u.Login
+	}
+	u.Blog = gu.Website
+	u.Email = gu.Email
+	u.Bio = gu.Description
+	return u
+}
+
+func NewUserFromGitlab(gu *gitlab.User) User {
+	var u User
+	u.ID = uint64(gu.ID)
+	u.Login = gu.Username
+	u.AvatarURL = gu.AvatarURL
+	u.Name = gu.Name
+	if u.Name == "" {
+		u.Name = u.Login
+	}
+	u.Blog = gu.WebsiteURL
+	u.Email = gu.Email
+	u.Bio = gu.Bio
+	return u
+}
+
 func NewUserFromGitHub(gu *github.User) User {
 	var u User
 	u.ID = uint64(gu.GetID())
@@ -35,14 +64,8 @@ func NewUserFromGitHub(gu *github.User) User {
 		u.Name = u.Login
 	}
 	u.Blog = gu.GetBlog()
-	u.Blog = gu.GetBlog()
 	u.Email = gu.GetEmail()
 	u.Hireable = gu.GetHireable()
 	u.Bio = gu.GetBio()
 	return u
-}
-
-func (u *User) IssueNewToken() {
-	u.Token = utils.MD5(fmt.Sprintf("%d%d%s", time.Now().UnixNano(), u.ID, u.Login))
-	u.TokenExpired = time.Now().AddDate(0, 2, 0)
 }

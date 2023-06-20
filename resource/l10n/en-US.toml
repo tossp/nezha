@@ -70,6 +70,9 @@ other = "Ignore All, Only execute by specific servers"
 [AllIncludedOnlySpecificServersAreNotExecuted]
 other = "Cover All, Only ignore specific servers"
 
+[ExecuteByTriggerServer]
+other = "Only servers that are included in the notification rule"
+
 [SpecificServers]
 other = "Specific Servers"
 
@@ -81,6 +84,15 @@ other = "Notification Group"
 
 [PushSuccessMessages]
 other = "Send Success Notification"
+
+[TaskType]
+other = "Task Type"
+
+[CronTask]
+other = "Scheduled task"
+
+[TriggerTask]
+other = "Trigger task"
 
 [TheFormaOfTheScheduleIs]
 other = "The Cron Expression is like:"
@@ -118,6 +130,21 @@ other = "Seconds"
 [EnableFailureNotification]
 other = "Enable Failure Notification"
 
+[FailureNotification]
+other = "Incident Notification"
+
+[MaxLatency]
+other = "Max Latency (ms)"
+
+[MinLatency]
+other = "Min Latency (ms)"
+
+[EnableLatencyNotification]
+other = "Enable Latency Notifications"
+
+[LatencyNotification]
+other = "Latency Notification"
+
 [IntroductionOfMonitor]
 other = """
 Input URL(With http/https prefix) for type <b>HTTP-GET</b>, SSL Certificate will be monitored automatically when URL has https prefix;<br>
@@ -143,16 +170,43 @@ other = "Request Type"
 other = "Verify SSL"
 
 [AddNotificationRule]
-other = "Add Alarm Rule"
+other = "Add Notification Rule"
 
 [Rules]
 other = "Rules"
+
+[NotificationTriggerMode]
+other = "Mode of triggering notification"
+
+[ModeAlwaysTrigger]
+other = "Always triggered"
+
+[ModeOnetimeTrigger]
+other = "Triggered only once"
+
+[EnableTriggerTask]
+other = "Enable trigger tasks"
+
+[FailTriggerTasks]
+other = "Tasks to be triggered in case of failure"
+
+[RecoverTriggerTasks]
+other = "Tasks to be triggered after fault recovery"
 
 [Enable]
 other = "Enable"
 
 [AddServer]
 other = "Add Server"
+
+[BatchEditServerGroup]
+other = "Batch Modify Groups"
+
+[BatchDeleteServer]
+other = "Batch Delete Server"
+
+[InputServerGroupName]
+other = "Enter the name of the group"
 
 [ServerGroup]
 other = "Server Group"
@@ -164,7 +218,7 @@ other = "Einstein Light Speed 1"
 other = "Display Index"
 
 [TheLargerTheNumberTheHigherThePriority]
-other = "A larger index will be ranked previous"
+other = "Greater numbers will be displayed first"
 
 [Secret]
 other = "Secret"
@@ -182,7 +236,7 @@ other = "Set CDN bypassed Domain/IP in setting before using this function"
 other = "Send Success Notification"
 
 [LastExecution]
-other = "Last Execution"
+other = "Last run on"
 
 [LastResult]
 other = "Last Result"
@@ -195,6 +249,9 @@ other = "Cover All"
 
 [IgnoreAll]
 other = "Ignore All"
+
+[ByTrigger]
+other = "Execute when triggered"
 
 [DeleteScheduledTask]
 other = "Delete Scheduled Task"
@@ -247,13 +304,13 @@ other = "Version"
 [OneKeyInstall]
 other = "One-click installation"
 
-[ClickToCopyTheInstallationCommand]
-other = "Click To Copy Install Command"
+[ClickToCopy]
+other = "Click To Copy"
 
 [DeleteServer]
 other = "Delete Server"
 
-[ConfirmToDeleteThisServer]
+[ConfirmToDeleteServer]
 other = "Confirm Delete?"
 
 [NoServerSelected]
@@ -281,13 +338,13 @@ other = "Access Password"
 other = "CDN Bypassed Domain/IP"
 
 [IPChangeAlert]
-other = "IP Change Alert"
+other = "IP Change Notification"
 
 [AllIncludedOnlySpecificServersAreNotAlerted]
 other = "Cover All, Only ignore specific servers"
 
 [IgnoreAllOnlyAlertSpecificServers]
-other = "Ignore All, Only alert specific servers"
+other = "Ignore all, cover only specific servers"
 
 [IgnoreAllRequestOnlyThroughSpecificServers]
 other = "Skip All Servers, Only send requests via specific servers"
@@ -302,7 +359,7 @@ other = "Server ID, separated by comma"
 other = "Send Notification To Specific Notification Group"
 
 [NotificationMessagesDoNotHideIP]
-other = "Do NOT desensitize Server IP In Notification Messages"
+other = "Do NOT hide the IP in the notification"
 
 [Save]
 other = "Save"
@@ -356,7 +413,7 @@ other = "Last Active"
 other = "Version"
 
 [NetSpeed]
-other = "Network Speed"
+other = "Network"
 
 [Uptime]
 other = "Uptime"
@@ -392,7 +449,7 @@ other = "Status"
 other = "Availability"
 
 [AverageLatency]
-other = "Average Latency"
+other = "Average delay"
 
 [CycleTransferStats]
 other = "Cycle Transfer Statistics"
@@ -528,3 +585,15 @@ other = "Task Failed"
 
 [IPChanged]
 other = "IP Changed"
+
+[Transleft]
+other = "Data remaining"
+
+[DashboardTheme]
+other = "Admin Panel Theme"
+
+[Info]
+other = "Info"
+
+[HideForGuest]
+other = "No display to visitors"
